@@ -1,5 +1,5 @@
 {
-  "name": "react-datocms",
+  "name": "solid-datocms",
   "version": "4.0.9",
   "types": "dist/types/index.d.ts",
   "main": "dist/cjs/index.js",
@@ -41,11 +41,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/datocms/react-datocms.git"
+    "url": "git://github.com/datocms/solid-datocms.git"
   },
   "license": "MIT",
-  "author": "Stefano Verna <s.verna@datocms.com>",
-  "homepage": "https://github.com/datocms/react-datocms",
+  "author": "Ivo Ilic",
+  "homepage": "https://github.com/datocms/solid-datocms",
   "devDependencies": {
     "@types/enzyme": "^3.10.8",
     "@types/enzyme-to-json": "^1.5.4",
@@ -66,6 +66,7 @@
     "react-dom": "^17.0.2",
     "rimraf": "^3.0.2",
     "rome": "^10.0.1",
+    "solid-js": "^1.6.15",
     "ts-jest": "^26.5.5",
     "typescript": "^4.5.5"
   },

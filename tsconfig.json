@@ -8,13 +8,14 @@
     "outDir": "./dist/cjs",
     "target": "es3",
     "moduleResolution": "node",
-    "jsx": "react",
+    "jsx": "preserve",
     "resolveJsonModule": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
     "skipLibCheck": false,
-    "sourceMap": true
+    "sourceMap": true,
+    "jsxImportSource": "solid-js"
   },
-  "include": ["src/**/*", "test/jest-dom.d.ts", "react-extras.d.ts"],
+  "include": ["src/**/*", "test/jest-dom.d.ts", "solid-extras.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

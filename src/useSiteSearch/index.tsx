@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { createSignal, createEffect, onCleanup } from 'solid-js';
 import reactStringReplace from 'react-string-replace';
 
 type SearchResultInstancesHrefSchema = {
@@ -45,7 +45,7 @@ declare class GenericClient {
   };
   searchResults: {
     rawList(
-      queryParams: SearchResultInstancesHrefSchema,
+      queryParams: SearchResultInstancesHrefSchema
     ): Promise<SearchResultInstancesTargetSchema>;
   };
 }
@@ -53,7 +53,7 @@ declare class GenericClient {
 type Highlighter = (
   match: string,
   key: string,
-  context: 'title' | 'bodyExcerpt',
+  context: 'title' | 'bodyExcerpt'
 ) => React.ReactNode;
 
 export type UseSiteSearchConfig<Client extends GenericClient> = {
@@ -96,9 +96,7 @@ export type UseSiteSearchResult = {
   error?: string;
 };
 
-const defaultHighlighter: Highlighter = (text, key) => (
-  <mark key={key}>{text}</mark>
-);
+const defaultHighlighter: Highlighter = (text, key) => <mark key={key}>{text}</mark>;
 
 function MatchHighlighter({
   children,
@@ -112,16 +110,16 @@ function MatchHighlighter({
   return (
     <>
       {reactStringReplace(children, /\[h\](.+?)\[\/h\]/g, (match, index) =>
-        highlighter(match, index.toString(), context),
+        highlighter(match, index.toString(), context)
       )}
     </>
   );
 }
 
 export function useSiteSearch<Client extends GenericClient>(
-  config: UseSiteSearchConfig<Client>,
+  config: UseSiteSearchConfig<Client>
 ): UseSiteSearchResult {
-  const [state, setState] = useState<{
+  const [state, setState] = createSignal<{
     query: string;
     page: number;
     locale: string | undefined;
@@ -131,14 +129,12 @@ export function useSiteSearch<Client extends GenericClient>(
     locale: config.initialState?.locale,
   });
 
-  const [error, setError] = useState<string | undefined>();
-  const [response, setResponse] = useState<
-    SearchResultInstancesTargetSchema | undefined
-  >();
+  const [error, setError] = createSignal<string | undefined>();
+  const [response, setResponse] = createSignal<SearchResultInstancesTargetSchema | undefined>();
 
   const resultsPerPage = config.resultsPerPage || 8;
 
-  useEffect(() => {
+  createEffect(() => {
     let isCancelled = false;
 
     const run = async () => {
@@ -188,37 +184,22 @@ export function useSiteSearch<Client extends GenericClient>(
 
     run();
 
-    return () => {
+    onCleanup(() => {
       isCancelled = true;
-    };
-  }, [
-    resultsPerPage,
-    state,
-    config.buildTriggerId,
-    config.fuzzySearch,
-    config.client.config.apiToken,
-  ]);
+    });
+  });
 
-  const publicSetQuery = useCallback(
-    (newQuery: string) => {
-      setState((oldState) => ({ ...oldState, query: newQuery, page: 0 }));
-    },
-    [setState],
-  );
+  const publicSetQuery = (newQuery: string) => {
+    setState((oldState) => ({ ...oldState, query: newQuery, page: 0 }));
+  };
 
-  const publicSetPage = useCallback(
-    (newPage: number) => {
-      setState((oldState) => ({ ...oldState, page: newPage }));
-    },
-    [setState],
-  );
+  const publicSetPage = (newPage: number) => {
+    setState((oldState) => ({ ...oldState, page: newPage }));
+  };
 
-  const publicSetLocale = useCallback(
-    (newLocale: string | undefined) => {
-      setState((oldState) => ({ ...oldState, locale: newLocale, page: 0 }));
-    },
-    [setState],
-  );
+  const publicSetLocale = (newLocale: string | undefined) => {
+    setState((oldState) => ({ ...oldState, locale: newLocale, page: 0 }));
+  };
 
   const highlighter = config.highlightMatch || defaultHighlighter;
 
@@ -253,10 +234,7 @@ export function useSiteSearch<Client extends GenericClient>(
                 rawSearchResult.attributes.title
               ),
               bodyExcerpt: rawSearchResult.attributes.highlight.body ? (
-                <MatchHighlighter
-                  highlighter={highlighter}
-                  context="bodyExcerpt"
-                >
+                <MatchHighlighter highlighter={highlighter} context="bodyExcerpt">
                   {rawSearchResult.attributes.highlight.body[0]}
                 </MatchHighlighter>
               ) : (

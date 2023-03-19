@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { createSignal, onCleanup, createEffect } from 'solid-js';
 import {
   subscribeToQuery,
   UnsubscribeFn,
@@ -6,9 +6,6 @@ import {
   ConnectionStatus,
   Options,
 } from 'datocms-listen';
-import {
-  useDeepCompareEffectNoCheck as useDeepCompareEffect,
-} from 'use-deep-compare-effect';
 
 export type SubscribeToQueryOptions<QueryResult, QueryVariables> = Omit<
   Options<QueryResult, QueryVariables>,
@@ -33,24 +30,18 @@ export type QueryListenerOptions<QueryResult, QueryVariables> =
   | EnabledQueryListenerOptions<QueryResult, QueryVariables>
   | DisabledQueryListenerOptions<QueryResult, QueryVariables>;
 
-export function useQuerySubscription<
-  QueryResult = any,
-  QueryVariables = Record<string, any>,
->(options: QueryListenerOptions<QueryResult, QueryVariables>) {
+export function useQuerySubscription<QueryResult = any, QueryVariables = Record<string, any>>(
+  options: QueryListenerOptions<QueryResult, QueryVariables>
+) {
   const { enabled, initialData, ...other } = options;
 
-  const [error, setError] = useState<ChannelErrorData | null>(null);
-  const [data, setData] = useState<QueryResult | null>(null);
-  const [status, setStatus] = useState<ConnectionStatus>(
-    enabled ? 'connecting' : 'closed',
-  );
+  const [error, setError] = createSignal<ChannelErrorData | null>(null);
+  const [data, setData] = createSignal<QueryResult | null>(null);
+  const [status, setStatus] = createSignal<ConnectionStatus>(enabled ? 'connecting' : 'closed');
 
-  const subscribeToQueryOptions = other as EnabledQueryListenerOptions<
-    QueryResult,
-    QueryVariables
-  >;
+  const subscribeToQueryOptions = other as EnabledQueryListenerOptions<QueryResult, QueryVariables>;
 
-  useDeepCompareEffect(() => {
+  createEffect(() => {
     if (enabled === false) {
       setStatus('closed');
 
@@ -80,12 +71,12 @@ export function useQuerySubscription<
 
     subscribe();
 
-    return () => {
+    onCleanup(() => {
       if (unsubscribe) {
         unsubscribe();
       }
-    };
-  }, [subscribeToQueryOptions]);
+    });
+  });
 
   return { error, status, data: data || initialData };
 }
